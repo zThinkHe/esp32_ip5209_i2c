@@ -152,6 +152,8 @@ float IP5209Driver::readBatteryCurrent() {
 // 读取当前电量
 float IP5209Driver::getBatteryLevel() {
     float voltage = readBatteryVoltage();
+    ESP_LOGE(TAG, "Current battery voltage: %.2f", voltage); 
+
     if (voltage < 0.0f) {
         return -1.0f;
     }

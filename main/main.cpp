@@ -24,9 +24,6 @@ extern "C" void app_main() {
         if (ip5209.initialize() == ESP_OK) {
             ESP_LOGE(TAG, "Driver initialized successfully.\n");
             while (true) {
-                float voltage = ip5209.readBatteryVoltage();
-                ESP_LOGE(TAG, "Current battery voltage: %.2f", voltage); 
-
                 float level = ip5209.getBatteryLevel();
                 ESP_LOGE(TAG, "Current battery level: %.2f", level); 
                 
