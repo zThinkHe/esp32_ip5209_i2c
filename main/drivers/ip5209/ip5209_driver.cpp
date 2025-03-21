@@ -52,8 +52,8 @@ IP5209Driver::IP5209Driver(i2c_master_bus_config_t i2c_bus_config) : bus_handle(
     }
 
     // 初始化GPIO
-    gpio_reset_pin(I2C_MASTER_IRQ_IO);
-    gpio_set_direction(I2C_MASTER_IRQ_IO, GPIO_MODE_INPUT);
+    gpio_reset_pin(I2C_IP5209_IRQ_IO);
+    gpio_set_direction(I2C_IP5209_IRQ_IO, GPIO_MODE_INPUT);
 }
 
 // 析构函数

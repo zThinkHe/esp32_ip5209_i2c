@@ -3,6 +3,7 @@
 #include "freertos/FreeRTOS.h"    // 新增头文件
 #include "freertos/task.h" 
 #include <esp_log.h>
+#include "config.h"
 
 static const char* TAG = "MAIN";
 extern "C" void app_main() {
@@ -23,6 +24,9 @@ extern "C" void app_main() {
         if (ip5209.initialize() == ESP_OK) {
             while (true) {
                 ESP_LOGE(TAG, "Driver initialized successfully.\n");
+                float voltage = ip5209.readBatteryVoltage();
+                ESP_LOGE(TAG, "Current battery voltage: %.2f", voltage); 
+
                 float level = ip5209.getBatteryLevel();
                 ESP_LOGE(TAG, "Current battery level: %.2f", level); 
                 

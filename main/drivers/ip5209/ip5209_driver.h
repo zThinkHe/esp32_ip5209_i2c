@@ -12,11 +12,9 @@
 #define IP5209_I2C_ADDR  0x75
 
 // I2C 相关
-#define I2C_MASTER_SCL_IO  GPIO_NUM_4
-#define I2C_MASTER_SDA_IO  GPIO_NUM_5
-#define I2C_MASTER_IRQ_IO  GPIO_NUM_7
+#define I2C_IP5209_IRQ_IO  GPIO_NUM_7
 #define I2C_MASTER_FREQ_HZ  400000
-#define I2C_MASTER_TIMEOUT_MS  2000
+#define I2C_MASTER_TIMEOUT_MS  1000
 
 // 充电电流设置宏定义
 #define IP5209_CHARGE_CURRENT_500MA  6  // 500mA
@@ -74,7 +72,7 @@ class IP5209Driver {
         i2c_master_dev_handle_t  dev_handle;
     
         bool isI2CModeActive() {
-            return gpio_get_level(I2C_MASTER_IRQ_IO) == 1;
+            return gpio_get_level(I2C_IP5209_IRQ_IO) == 1;
         }
     };
 
