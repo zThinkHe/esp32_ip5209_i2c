@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "ip5209_driver.h"
-#include "freertos/FreeRTOS.h"    // 新增头文件
+#include "freertos/FreeRTOS.h"
 #include "freertos/task.h" 
 #include <esp_log.h>
 #include "config.h"
@@ -22,8 +22,8 @@ extern "C" void app_main() {
     };
     IP5209Driver ip5209(i2c_bus_config);
         if (ip5209.initialize() == ESP_OK) {
+            ESP_LOGE(TAG, "Driver initialized successfully.\n");
             while (true) {
-                ESP_LOGE(TAG, "Driver initialized successfully.\n");
                 float voltage = ip5209.readBatteryVoltage();
                 ESP_LOGE(TAG, "Current battery voltage: %.2f", voltage); 
 
