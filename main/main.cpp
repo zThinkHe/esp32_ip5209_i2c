@@ -27,8 +27,11 @@ extern "C" void app_main() {
                 float current = ip5209.getBatteryCurrent();
                 ESP_LOGI(TAG, "Current battery Current: %.2f mA", current); 
 
+                float voltage = ip5209.getBatteryVoltage();
+                ESP_LOGI(TAG, "Current battery voltage: %.4f V", voltage); 
+
                 float level = ip5209.getBatteryLevel();
-                ESP_LOGI(TAG, "Current battery level: %.2f", level); 
+                ESP_LOGI(TAG, "Current battery level: %.2f%%", level); 
                 
                 uint8_t charge_status = ip5209.getChargingStatus();
                 switch (charge_status) {

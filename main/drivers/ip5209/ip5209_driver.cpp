@@ -89,9 +89,9 @@ esp_err_t IP5209Driver::readRegister(uint8_t reg_addr, uint8_t* data, size_t dat
 // 初始化
 esp_err_t IP5209Driver::initialize() {
     disableLowLoadAutoPowerOff();
-    disable_ntc();
+    // disable_ntc();
     // enableLowLoadAutoPowerOff();
-    setFlashlight(false);
+    // setFlashlight(false);
     setChargeCurrent(IP5209_CHARGE_CURRENT_2A);
     return ESP_OK;
 }
