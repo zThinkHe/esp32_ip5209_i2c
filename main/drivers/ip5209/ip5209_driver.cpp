@@ -116,43 +116,92 @@ esp_err_t IP5209Driver::setChargeVoltage(uint8_t voltageSetting) {
 }
 
 // 读取电池电压
-float IP5209Driver::readBatteryVoltage() {
+float IP5209Driver::getBatteryVoltage() {
     uint8_t dataLow, dataHigh;
     esp_err_t ret = readRegister(IP5209_REG_BATVADC_DAT0, &dataLow, 1);
     if (ret != ESP_OK) {
+        ESP_LOGE("I2C", "Failed to read low register");
         return -1.0f;
     }
     ret = readRegister(IP5209_REG_BATVADC_DAT1, &dataHigh, 1);
     if (ret != ESP_OK) {
+        ESP_LOGE("I2C", "Failed to read high register");
         return -1.0f;
     }
 
-    uint16_t batVadc = (static_cast<uint16_t>(dataHigh) << 8) | dataLow;
-    float voltage = (batVadc * 0.26855f) + 2600.0f; // 单位：mV
-    return voltage / 1000.0f; // 转换为V
+    // 判断是否为补码
+    if ((dataHigh & 0x20) == 0x20) { // 补码情况
+        int16_t a = ~dataLow;
+        int16_t b = (~(dataHigh & 0x1F)) & 0x1F;
+        int16_t c = (b << 8) | (a + 1);
+        float voltage = 2600.0f - (c * 0.26855f); // 单位：mV
+        return voltage / 1000.0f; // 转换为V
+    } else { // 原码情况
+        uint16_t batOcVadc = (static_cast<uint16_t>(dataHigh) << 8) | dataLow;
+        float voltage = 2600.0f + (batOcVadc * 0.26855f); // 单位：mV
+        return voltage / 1000.0f; // 转换为V
+    }
 }
 
 // 读取电池电流
-float IP5209Driver::readBatteryCurrent() {
+float IP5209Driver::getBatteryCurrent() {
     uint8_t dataLow, dataHigh;
     esp_err_t ret = readRegister(IP5209_REG_BATIADC_DAT0, &dataLow, 1);
     if (ret != ESP_OK) {
+        ESP_LOGE("I2C", "Failed to read low register");
         return -1.0f;
     }
     ret = readRegister(IP5209_REG_BATIADC_DAT1, &dataHigh, 1);
     if (ret != ESP_OK) {
+        ESP_LOGE("I2C", "Failed to read high register");
         return -1.0f;
     }
 
-    int16_t batIadc = (static_cast<int16_t>(dataHigh) << 8) | dataLow;
-    float current = batIadc * 0.745985f; // 单位：mA
-    return current;
+    // 判断正负值
+    if ((dataHigh & 0x20) == 0x20) { // 负值
+        int16_t a = ~dataLow;
+        int16_t b = (~(dataHigh & 0x1F)) & 0x1F;
+        int16_t batIadc = (b << 8) | (a + 1);
+        return -batIadc * 0.745985f; // 单位：mA
+    } else { // 正值
+        int16_t batIadc = (static_cast<int16_t>(dataHigh) << 8) | dataLow;
+        return batIadc * 0.745985f; // 单位：mA
+    }
+}
+
+// 读取电池开路电压
+// BATOCV=BATVADC+BATIADC*预设电池内阻（BATIADC 有方向）
+float IP5209Driver::getBatteryOcVoltage() {
+    uint8_t dataLow, dataHigh;
+    esp_err_t ret = readRegister(IP5209_REG_BATOCV_DAT0, &dataLow, 1);
+    if (ret != ESP_OK) {
+        ESP_LOGE("I2C", "Failed to read low register");
+        return -1.0f;
+    }
+    ret = readRegister(IP5209_REG_BATOCV_DAT1, &dataHigh, 1);
+    if (ret != ESP_OK) {
+        ESP_LOGE("I2C", "Failed to read high register");
+        return -1.0f;
+    }
+
+    // 判断是否为补码
+    if ((dataHigh & 0x20) == 0x20) { // 补码情况
+        int16_t a = ~dataLow;
+        int16_t b = (~(dataHigh & 0x1F)) & 0x1F;
+        int16_t c = (b << 8) | (a + 1);
+        float voltage = 2600.0f - (c * 0.26855f); // 单位：mV
+        return voltage / 1000.0f; // 转换为V
+    } else { // 原码情况
+        uint16_t batOcVadc = (static_cast<uint16_t>(dataHigh) << 8) | dataLow;
+        float voltage = 2600.0f + (batOcVadc * 0.26855f); // 单位：mV
+        return voltage / 1000.0f; // 转换为V
+    }
 }
 
 // 读取当前电量
 float IP5209Driver::getBatteryLevel() {
-    float voltage = readBatteryVoltage();
-    ESP_LOGE(TAG, "Current battery voltage: %.2f", voltage); 
+    float voltage = getBatteryOcVoltage();
+    ESP_LOGE(TAG, "Current battery OC voltage: %.2f V", voltage); 
 
     if (voltage < 0.0f) {
         return -1.0f;
@@ -160,8 +209,8 @@ float IP5209Driver::getBatteryLevel() {
 
     if (voltage >= 4.2f) {
         return 100.0f;
-    } else if (voltage >= 3.7f) {
-        return (voltage - 3.7f) / (4.2f - 3.7f) * 100.0f;
+    } else if (voltage >= 3.0f) {
+        return (voltage - 3.0f) / (4.2f - 3.0f) * 100.0f;
     } else {
         return 0.0f;
     }
@@ -235,39 +284,15 @@ esp_err_t IP5209Driver::enableLowLoadAutoPowerOff() {
 }
 
 // 获取充电状态
-esp_err_t IP5209Driver::getChargingStatus() {
+uint8_t IP5209Driver::getChargingStatus() {
     uint8_t data;
+    uint8_t charge_status = 0x0F;
     esp_err_t ret = readRegister(IP5209_REG_READ0, &data, 1);
     if (ret == ESP_OK) {
         // 解析充电状态
-        uint8_t charge_status = (data >> 5) & 0x07;
-        switch (charge_status) {
-            case 0x00:
-                ESP_LOGI("CHARGE", "Idle");
-                break;
-            case 0x01:
-                ESP_LOGI("CHARGE", "Trickle Charging");
-                break;
-            case 0x02:
-                ESP_LOGI("CHARGE", "Constant Current Charging");
-                break;
-            case 0x03:
-                ESP_LOGI("CHARGE", "Constant Voltage Charging");
-                break;
-            case 0x04:
-                ESP_LOGI("CHARGE", "Constant Voltage Stop Detection");
-                break;
-            case 0x05:
-                ESP_LOGI("CHARGE", "Charge Full");
-                break;
-            case 0x06:
-                ESP_LOGI("CHARGE", "Charge Timeout");
-                break;
-            default:
-                ESP_LOGI("CHARGE", "Unknown status");
-        }
+        charge_status = (data >> 5) & 0x07;
     } else {
         ESP_LOGE("I2C", "Failed to read register");
     }
-    return ret;
+    return charge_status;
 }

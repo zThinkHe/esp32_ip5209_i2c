@@ -24,12 +24,40 @@ extern "C" void app_main() {
         if (ip5209.initialize() == ESP_OK) {
             ESP_LOGE(TAG, "Driver initialized successfully.\n");
             while (true) {
+                float current = ip5209.getBatteryCurrent();
+                ESP_LOGE(TAG, "Current battery Current: %.2f mA", current); 
+
                 float level = ip5209.getBatteryLevel();
                 ESP_LOGE(TAG, "Current battery level: %.2f", level); 
                 
-                ip5209.getChargingStatus();
+                uint8_t charge_status = ip5209.getChargingStatus();
+                switch (charge_status) {
+                    case 0x00:
+                        ESP_LOGI("CHARGE", "Idle");
+                        break;
+                    case 0x01:
+                        ESP_LOGI("CHARGE", "Trickle Charging");
+                        break;
+                    case 0x02:
+                        ESP_LOGI("CHARGE", "Constant Current Charging");
+                        break;
+                    case 0x03:
+                        ESP_LOGI("CHARGE", "Constant Voltage Charging");
+                        break;
+                    case 0x04:
+                        ESP_LOGI("CHARGE", "Constant Voltage Stop Detection");
+                        break;
+                    case 0x05:
+                        ESP_LOGI("CHARGE", "Charge Full");
+                        break;
+                    case 0x06:
+                        ESP_LOGI("CHARGE", "Charge Timeout");
+                        break;
+                    default:
+                        ESP_LOGI("CHARGE", "Unknown status");
+                }
                 
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
             }
         } else {
             ESP_LOGE(TAG, "Failed to initialize driver.\n");

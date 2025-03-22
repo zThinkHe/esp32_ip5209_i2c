@@ -23,6 +23,15 @@
 #define IP5209_CHARGE_CURRENT_1_5A   18 // 1.5A
 #define IP5209_CHARGE_CURRENT_2A     23 // 2A
 
+// 充电状态
+#define IP5209_CHARGE_STATUS_IDLE           0x0  // "Idle"
+#define IP5209_CHARGE_STATUS_TRICKLE        0x01 // "Trickle Charging"
+#define IP5209_CHARGE_STATUS_CCURRENT       0x02 // "Constant Current Charging"
+#define IP5209_CHARGE_STATUS_CVOLTAGE       0x03 // "Constant Voltage Charging"
+#define IP5209_CHARGE_STATUS_CVSTOP         0x04 // "Constant Voltage Stop Detection"
+#define IP5209_CHARGE_STATUS_FULL           0x05 // "Charge Full"
+#define IP5209_CHARGE_STATUS_TIMEOUT        0x06 // "Charge Timeout"
+#define IP5209_CHARGE_STATUS_UNKNOWN        0x07 // "Unknown"
 
 // 寄存器定义
 #define IP5209_REG_SYS_CTL0        0x01
@@ -38,6 +47,8 @@
 #define IP5209_REG_BATVADC_DAT1    0xA3
 #define IP5209_REG_BATIADC_DAT0    0xA4
 #define IP5209_REG_BATIADC_DAT1    0xA5
+#define IP5209_REG_BATOCV_DAT0     0xA8
+#define IP5209_REG_BATOCV_DAT1     0xA9
 #define IP5209_REG_READ0           0x71
 
 class IP5209Driver {
@@ -53,8 +64,9 @@ class IP5209Driver {
         esp_err_t setChargeCurrent(uint8_t currentSetting);
         esp_err_t setChargeVoltage(uint8_t voltageSetting);
     
-        float readBatteryVoltage();
-        float readBatteryCurrent();
+        float getBatteryVoltage();
+        float getBatteryCurrent();
+        float getBatteryOcVoltage();
         float getBatteryLevel();
     
         esp_err_t setFlashlight(bool enable);
@@ -64,7 +76,7 @@ class IP5209Driver {
         esp_err_t disableLowLoadAutoPowerOff();
         esp_err_t enableLowLoadAutoPowerOff();
 
-        esp_err_t getChargingStatus();
+        uint8_t getChargingStatus();
     
     private:
         uint8_t slave_addr;
