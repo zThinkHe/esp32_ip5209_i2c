@@ -89,6 +89,9 @@ esp_err_t IP5209Driver::readRegister(uint8_t reg_addr, uint8_t* data, size_t dat
 // 初始化
 esp_err_t IP5209Driver::initialize() {
     disableLowLoadAutoPowerOff();
+    disable_ntc();
+    // enableLowLoadAutoPowerOff();
+    setFlashlight(false);
     setChargeCurrent(IP5209_CHARGE_CURRENT_2A);
     return ESP_OK;
 }
@@ -295,4 +298,46 @@ uint8_t IP5209Driver::getChargingStatus() {
         ESP_LOGE("I2C", "Failed to read register");
     }
     return charge_status;
+}
+
+// 关闭NTC功能的函数
+esp_err_t IP5209Driver::disable_ntc() {
+    uint8_t data;
+    // 读取SYS_CTL5寄存器的当前值
+    esp_err_t ret = readRegister(IP5209_REG_SYS_CTL5, &data, 1);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to read SYS_CTL5 register");
+        return ret;
+    }
+    // 设置Bit6为1，关闭NTC功能
+    data |= (1 << 6);
+    // 写回修改后的值到SYS_CTL5寄存器
+    ret = writeRegister(IP5209_REG_SYS_CTL5, data);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to write SYS_CTL5 register");
+        return ret;
+    }
+    ESP_LOGI(TAG, "NTC function has been disabled");
+    return ESP_OK;
+}
+
+// 打开NTC功能的函数
+esp_err_t IP5209Driver::enable_ntc() {
+    uint8_t data;
+    // 读取SYS_CTL5寄存器的当前值
+    esp_err_t ret = readRegister(IP5209_REG_SYS_CTL5, &data, 1);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to read SYS_CTL5 register");
+        return ret;
+    }
+    // 设置Bit6为0，打开NTC功能
+    data |= ~(1 << 6);
+    // 写回修改后的值到SYS_CTL5寄存器
+    ret = writeRegister(IP5209_REG_SYS_CTL5, data);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to write SYS_CTL5 register");
+        return ret;
+    }
+    ESP_LOGI(TAG, "NTC function has been enabled");
+    return ESP_OK;
 }

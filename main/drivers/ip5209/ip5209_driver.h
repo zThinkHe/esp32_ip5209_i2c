@@ -76,6 +76,9 @@ class IP5209Driver {
         esp_err_t disableLowLoadAutoPowerOff();
         esp_err_t enableLowLoadAutoPowerOff();
 
+        esp_err_t disable_ntc();
+        esp_err_t enable_ntc();
+
         uint8_t getChargingStatus();
     
     private:
