@@ -123,12 +123,12 @@ float IP5209Driver::getBatteryVoltage() {
     uint8_t dataLow, dataHigh;
     esp_err_t ret = readRegister(IP5209_REG_BATVADC_DAT0, &dataLow, 1);
     if (ret != ESP_OK) {
-        ESP_LOGE("I2C", "Failed to read low register");
+        ESP_LOGE(TAG, "Failed to read low register");
         return -1.0f;
     }
     ret = readRegister(IP5209_REG_BATVADC_DAT1, &dataHigh, 1);
     if (ret != ESP_OK) {
-        ESP_LOGE("I2C", "Failed to read high register");
+        ESP_LOGE(TAG, "Failed to read high register");
         return -1.0f;
     }
 
@@ -151,12 +151,12 @@ float IP5209Driver::getBatteryCurrent() {
     uint8_t dataLow, dataHigh;
     esp_err_t ret = readRegister(IP5209_REG_BATIADC_DAT0, &dataLow, 1);
     if (ret != ESP_OK) {
-        ESP_LOGE("I2C", "Failed to read low register");
+        ESP_LOGE(TAG, "Failed to read low register");
         return -1.0f;
     }
     ret = readRegister(IP5209_REG_BATIADC_DAT1, &dataHigh, 1);
     if (ret != ESP_OK) {
-        ESP_LOGE("I2C", "Failed to read high register");
+        ESP_LOGE(TAG, "Failed to read high register");
         return -1.0f;
     }
 
@@ -178,12 +178,12 @@ float IP5209Driver::getBatteryOcVoltage() {
     uint8_t dataLow, dataHigh;
     esp_err_t ret = readRegister(IP5209_REG_BATOCV_DAT0, &dataLow, 1);
     if (ret != ESP_OK) {
-        ESP_LOGE("I2C", "Failed to read low register");
+        ESP_LOGE(TAG, "Failed to read low register");
         return -1.0f;
     }
     ret = readRegister(IP5209_REG_BATOCV_DAT1, &dataHigh, 1);
     if (ret != ESP_OK) {
-        ESP_LOGE("I2C", "Failed to read high register");
+        ESP_LOGE(TAG, "Failed to read high register");
         return -1.0f;
     }
 
@@ -204,19 +204,36 @@ float IP5209Driver::getBatteryOcVoltage() {
 // 读取当前电量
 float IP5209Driver::getBatteryLevel() {
     float voltage = getBatteryOcVoltage();
-    ESP_LOGE(TAG, "Current battery OC voltage: %.2f V", voltage); 
+    ESP_LOGI(TAG, "Current battery OC voltage: %.4f V", voltage); 
 
-    if (voltage < 0.0f) {
-        return -1.0f;
-    }
-
-    if (voltage >= 4.2f) {
+    if (voltage >= 4.195) {
         return 100.0f;
-    } else if (voltage >= 3.0f) {
-        return (voltage - 3.0f) / (4.2f - 3.0f) * 100.0f;
+    }else if (voltage >= 4.06f && voltage < 4.195f) {
+        return 90.0f + (voltage - 4.06f) * 71.43f;
+    } else if (voltage >= 3.98f && voltage < 4.06f) {
+        return 80.0f + (voltage - 3.98f) * 125.0f;
+    } else if (voltage >= 3.92f && voltage < 3.98f) {
+        return 70.0f + (voltage - 3.92f) * 166.67f;
+    } else if (voltage >= 3.87f && voltage < 3.92f) {
+        return 60.0f + (voltage - 3.87f) * 200.0f;
+    } else if (voltage >= 3.82f && voltage < 3.87f) {
+        return 50.0f + (voltage - 3.82) * 200.0f;
+    } else if (voltage >= 3.79f && voltage < 3.82f) {
+        return 40.0f + (voltage - 3.79f) * 333.33f;
+    } else if (voltage >= 3.77f && voltage < 3.79f) {
+        return 30.0f + (voltage - 3.77) * 500.0f;
+    } else if (voltage >= 3.74f && voltage < 3.77f) {
+        return 20.0f + (voltage - 3.74f) * 333.33f;
+    } else if (voltage >= 3.68f && voltage < 3.74f) {
+        return 10.0f + (voltage - 3.68f) * 166.67f;
+    } else if (voltage >= 3.45f && voltage < 3.68f) {
+        return 5.0f + (voltage - 3.45f) * 17.86f;
+    } else if (voltage >= 3.00f && voltage < 3.45f) {
+        return (voltage - 3.00f) * 11.11f;
     } else {
-        return 0.0f;
+        return -1; // 电压超出范围
     }
+
 }
 
 // 设置手电筒功能

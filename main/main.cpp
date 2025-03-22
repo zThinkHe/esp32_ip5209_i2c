@@ -25,10 +25,10 @@ extern "C" void app_main() {
             ESP_LOGE(TAG, "Driver initialized successfully.\n");
             while (true) {
                 float current = ip5209.getBatteryCurrent();
-                ESP_LOGE(TAG, "Current battery Current: %.2f mA", current); 
+                ESP_LOGI(TAG, "Current battery Current: %.2f mA", current); 
 
                 float level = ip5209.getBatteryLevel();
-                ESP_LOGE(TAG, "Current battery level: %.2f", level); 
+                ESP_LOGI(TAG, "Current battery level: %.2f", level); 
                 
                 uint8_t charge_status = ip5209.getChargingStatus();
                 switch (charge_status) {
