@@ -21,7 +21,7 @@ extern "C" void app_main() {
         },
     };
     IP5209Driver ip5209(i2c_bus_config);
-        if (ip5209.initialize() == ESP_OK) {
+        if (ip5209.initialize(IP5209_CHARGE_CURRENT_1A) == ESP_OK) {
             ESP_LOGE(TAG, "Driver initialized successfully.\n");
             while (true) {
                 float current = ip5209.getBatteryCurrent();

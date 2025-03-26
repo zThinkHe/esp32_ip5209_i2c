@@ -87,23 +87,39 @@ esp_err_t IP5209Driver::readRegister(uint8_t reg_addr, uint8_t* data, size_t dat
 }
 
 // 初始化
-esp_err_t IP5209Driver::initialize() {
-    disableLowLoadAutoPowerOff();
-    // disable_ntc();
-    // enableLowLoadAutoPowerOff();
+esp_err_t IP5209Driver::initialize(uint8_t chargeCurrent, bool disableAutoPowerOff, bool disableNtc) {
+    esp_err_t ret;
+    // if disable auto power off
+    ret = disableLowLoadAutoPowerOff(disableAutoPowerOff);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    // if disable NTC
+    if (disableNtc) {
+        ret = disable_ntc();        
+        if (ret != ESP_OK) {
+            return ret;
+        }
+    }
+
     // setFlashlight(false);
-    setChargeCurrent(IP5209_CHARGE_CURRENT_2A);
+
+    ret = setChargeCurrent(chargeCurrent);
+    if (ret != ESP_OK) {
+        return ret;
+    }
     return ESP_OK;
 }
 
 // 设置充电电流
-esp_err_t IP5209Driver::setChargeCurrent(uint8_t currentSetting) {
+esp_err_t IP5209Driver::setChargeCurrent(uint8_t chargeCurrent) {
     uint8_t data;
     esp_err_t ret = readRegister(IP5209_REG_CHG_DIG_CTL4, &data, 1);
     if (ret != ESP_OK) {
         return ret;
     }
-    data = (data & 0xE0) | (currentSetting & 0x1F);
+    data = (data & 0xE0) | (chargeCurrent & 0x1F);
     return writeRegister(IP5209_REG_CHG_DIG_CTL4, data);
 }
 
@@ -282,24 +298,17 @@ esp_err_t IP5209Driver::setCharger(bool enable) {
 }
 
 // 关闭低负载自动关机功能
-esp_err_t IP5209Driver::disableLowLoadAutoPowerOff() {
+esp_err_t IP5209Driver::disableLowLoadAutoPowerOff(bool disableAutoPowerOff) {
     uint8_t data;
     esp_err_t ret = readRegister(IP5209_REG_SYS_CTL1, &data, 1);
     if (ret != ESP_OK) {
         return ret;
     }
-    data &= ~(1 << 1);
-    return writeRegister(IP5209_REG_SYS_CTL1, data);
-}
-
-// 打开低负载自动关机功能
-esp_err_t IP5209Driver::enableLowLoadAutoPowerOff() {
-    uint8_t data;
-    esp_err_t ret = readRegister(IP5209_REG_SYS_CTL1, &data, 1);
-    if (ret != ESP_OK) {
-        return ret;
+    if (disableAutoPowerOff) {
+        data &= ~(1 << 1);
+    } else {
+        data |= (1 << 1);
     }
-    data |= (1 << 1);
     return writeRegister(IP5209_REG_SYS_CTL1, data);
 }
 

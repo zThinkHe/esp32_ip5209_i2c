@@ -61,9 +61,9 @@ class IP5209Driver {
         esp_err_t writeRegister(uint8_t reg_addr, uint8_t data);
         esp_err_t readRegister(uint8_t reg_addr, uint8_t* data, size_t data_len);
     
-        esp_err_t initialize();
+        esp_err_t initialize(uint8_t chargeCurrent, bool disableAutoPowerOff=true, bool disableNtc=false);
     
-        esp_err_t setChargeCurrent(uint8_t currentSetting);
+        esp_err_t setChargeCurrent(uint8_t chargeCurrent);
         esp_err_t setChargeVoltage(uint8_t voltageSetting);
     
         float getBatteryVoltage();
@@ -75,8 +75,7 @@ class IP5209Driver {
         esp_err_t setBoost(bool enable);
         esp_err_t setCharger(bool enable);
     
-        esp_err_t disableLowLoadAutoPowerOff();
-        esp_err_t enableLowLoadAutoPowerOff();
+        esp_err_t disableLowLoadAutoPowerOff(bool disableAutoPowerOff);
 
         esp_err_t disable_ntc();
         esp_err_t enable_ntc();
