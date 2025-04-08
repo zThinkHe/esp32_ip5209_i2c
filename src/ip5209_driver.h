@@ -56,7 +56,7 @@ class IP5209Driver {
     public:
         IP5209Driver(i2c_master_bus_config_t i2c_bus_config, gpio_num_t ip5209_irq_pin);
         ~IP5209Driver();
-    
+        gpio_num_t ip5209_irq_pin;    
         esp_err_t writeRegister(uint8_t reg_addr, uint8_t data);
         esp_err_t readRegister(uint8_t reg_addr, uint8_t* data, size_t data_len);
     
@@ -85,9 +85,10 @@ class IP5209Driver {
         uint8_t slave_addr;
         i2c_master_bus_handle_t  bus_handle;
         i2c_master_dev_handle_t  dev_handle;
+
     
         bool isI2CModeActive() {
-            return gpio_get_level(I2C_IP5209_IRQ_IO) == 1;
+            return gpio_get_level(ip5209_irq_pin) == 1;
         }
     };
 
