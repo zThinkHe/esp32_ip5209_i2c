@@ -20,7 +20,7 @@ extern "C" void app_main() {
             .enable_internal_pullup = 1,
         },
     };
-    IP5209Driver ip5209(i2c_bus_config);
+    IP5209Driver ip5209(i2c_bus_config, I2C_IP5209_IRQ_IO);
         if (ip5209.initialize(IP5209_CHARGE_CURRENT_1A) == ESP_OK) {
             ESP_LOGE(TAG, "Driver initialized successfully.\n");
             while (true) {

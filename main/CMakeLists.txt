@@ -1,9 +1,9 @@
 set(SRCS
         "main.cpp"
-        "drivers/ip5209/ip5209_driver.cpp"
+        "src/ip5209_driver.cpp"
 )
 
-set(INCLUDE_DIRS . "drivers/ip5209")
+set(INCLUDE_DIRS . "src")
 
 idf_component_register(
     SRCS ${SRCS} 
