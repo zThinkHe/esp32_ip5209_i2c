@@ -28,7 +28,10 @@ static esp_err_t ip5209_i2c_read_reg(i2c_master_dev_handle_t dev_handle, uint8_t
 }
 
 // 构造函数
-IP5209Driver::IP5209Driver(i2c_master_bus_config_t i2c_bus_config, gpio_num_t ip5209_irq_pin) : bus_handle(nullptr), dev_handle(nullptr) {
+IP5209Driver::IP5209Driver(i2c_master_bus_config_t i2c_bus_config, gpio_num_t ip5209_irq_pin) : 
+    bus_handle(nullptr), 
+    dev_handle(nullptr),
+    ip5209_irq_pin(ip5209_irq_pin) {
   
     esp_err_t ret = i2c_new_master_bus(&i2c_bus_config, &bus_handle);
     if (ret != ESP_OK) {
