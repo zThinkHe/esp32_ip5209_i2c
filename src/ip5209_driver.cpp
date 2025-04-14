@@ -229,9 +229,9 @@ float IP5209Driver::getBatteryLevel() {
 
     if (voltage >= 4.2f) {
         voltage_level = 100.0f;
-    } else if (voltage >= 3.2f && voltage < 4.2f) {
-        voltage_level = (voltage - 3.2f) * 100.0f; // 斜率100%/V
-     } else if (voltage < 3.2f) {
+    } else if (voltage >= 3.0f && voltage < 4.2f) {
+        voltage_level = (voltage - 3.0f)/(4.2-3.0) * 100.0f; // 斜率100%/V
+     } else if (voltage < 3.0f) {
         voltage_level = 0.0f;
     }
     return voltage_level;
