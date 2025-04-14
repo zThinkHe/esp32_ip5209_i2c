@@ -225,34 +225,16 @@ float IP5209Driver::getBatteryLevel() {
     float voltage = getBatteryOcVoltage();
     ESP_LOGI(TAG, "Current battery OC voltage: %.4f V", voltage); 
 
-    if (voltage >= 4.195) {
-        return 100.0f;
-    }else if (voltage >= 4.06f && voltage < 4.195f) {
-        return 90.0f + (voltage - 4.06f) * 71.43f;
-    } else if (voltage >= 3.98f && voltage < 4.06f) {
-        return 80.0f + (voltage - 3.98f) * 125.0f;
-    } else if (voltage >= 3.92f && voltage < 3.98f) {
-        return 70.0f + (voltage - 3.92f) * 166.67f;
-    } else if (voltage >= 3.87f && voltage < 3.92f) {
-        return 60.0f + (voltage - 3.87f) * 200.0f;
-    } else if (voltage >= 3.82f && voltage < 3.87f) {
-        return 50.0f + (voltage - 3.82) * 200.0f;
-    } else if (voltage >= 3.79f && voltage < 3.82f) {
-        return 40.0f + (voltage - 3.79f) * 333.33f;
-    } else if (voltage >= 3.77f && voltage < 3.79f) {
-        return 30.0f + (voltage - 3.77) * 500.0f;
-    } else if (voltage >= 3.74f && voltage < 3.77f) {
-        return 20.0f + (voltage - 3.74f) * 333.33f;
-    } else if (voltage >= 3.68f && voltage < 3.74f) {
-        return 10.0f + (voltage - 3.68f) * 166.67f;
-    } else if (voltage >= 3.45f && voltage < 3.68f) {
-        return 5.0f + (voltage - 3.45f) * 17.86f;
-    } else if (voltage >= 3.00f && voltage < 3.45f) {
-        return (voltage - 3.00f) * 11.11f;
-    } else {
-        return -1; // 电压超出范围
-    }
+    float voltage_level = -1.0f;
 
+    if (voltage >= 4.2f) {
+        voltage_level = 100.0f;
+    } else if (voltage >= 3.2f && voltage < 4.2f) {
+        voltage_level = (voltage - 3.2f) * 100.0f; // 斜率100%/V
+     } else if (voltage < 3.2f) {
+        voltage_level = 0.0f;
+    }
+    return voltage_level;
 }
 
 // 设置手电筒功能
